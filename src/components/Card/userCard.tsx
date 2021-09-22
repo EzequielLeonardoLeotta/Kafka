@@ -39,26 +39,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface props {
-  titulo: string;
-  texto: string;
-  imagen: string;
-}
-
-export default function ItemCard({texto, titulo, imagen}: props) {
+export default function UserCard({apellido, nombre, email, nombreUsuario}: any) {
   const classes = useStyles();
 
   return (
     <Card variant="outlined">
       <Grid container direction="row" alignItems="center">
-        <Grid container item xs={4} justify="flex-start">
-          <img className={classes.media} src={imagen} alt="No hay foto"/>
-        </Grid>
-
-        <Grid container item xs={6} justify="center" >
+        <Grid container justify="center" >
           <CardContent className={classes.contend}>
-            <Typography style={{fontWeight: 'bold'}}>{titulo}</Typography>
-            <Typography>{texto}</Typography>
+            <Typography style={{fontWeight: 'bold'}}>Usuario: {nombreUsuario}</Typography>
+            <Typography>Email: {email}</Typography>
+            <Typography>Nombre: {`${apellido} ${nombre}`}</Typography>
           </CardContent>
         </Grid>
 

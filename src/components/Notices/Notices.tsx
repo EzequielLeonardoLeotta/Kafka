@@ -1,31 +1,32 @@
-import { Button, Grid, Input, TextField, Typography } from "@material-ui/core";
+import {
+  Button,
+  Card,
+  Grid,
+  Input,
+  TextField,
+  Typography,
+} from "@material-ui/core";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { Post } from "../../models/models";
-import FetchService from "../../functions/fetch/FetchService";
-import CardList from "../List/list";
 import useStyles from "../../styles/styles";
 import { storage, firestore } from "../../config";
+import ItemCard from "../Card/card";
+import { firestore as db } from "../../config";
+import UserCard from "../Card/userCard";
 
 const Notices: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [post, setPost] = useState<Post>();
   const classes = useStyles();
   const [file, setFile] = useState(null);
   const [titulo, setTitulo] = useState("");
   const [texto, setTexto] = useState("");
+  const [users, setUsers] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchProductos = async () => {
-  //     setIsLoadingMenu(true);
-  //     const response = await FetchService.fetchRestaurantByTitulo(
-  //       params.titulo as string
-  //     );
-  //     setProductos(response.menu)
-  //     setIsLoadingMenu(false);
-  //   };
-  //   fetchProductos();
-  // }, [params.titulo]);
+  useEffect(() => {
+    consultarNoticias()
+    getUsers()
+  },[]);
 
   const agregarPost = async () => {
     try {
@@ -36,28 +37,33 @@ const Notices: React.FC = () => {
         await fileRef.put(file);
         //Save file on database
         await fileRef.getDownloadURL().then((url: string) => {
-          const collection = firestore.collection("posts");
+          // const collection = firestore.collection("posts");
           const postAux: Post = {
             titulo: titulo,
             imagen: url,
             texto: texto,
           };
-          setPost(postAux);
-          collection.doc().set({
-            titulo: titulo,
-            imagen: url,
-            texto: texto,
-          });
+
+          // setPost(postAux);
+          // collection.doc().set({
+          //   titulo: titulo,
+          //   imagen: url,
+          //   texto: texto,
+          // });
+
+          // Mandar a Kafka
+          console.log(postAux);
+          savePost(postAux);
         });
-        // Mandar a Kafka
-        savePost()
       }
     } catch (error) {
       console.log("Error al subir el archivo");
+    } finally {
+      // setPost(undefined)
     }
   };
 
-  const savePost = () => {
+  const savePost = (post: Post) => {
     fetch("http://localhost:9000/post", {
       method: "POST",
       body: JSON.stringify(post),
@@ -65,13 +71,19 @@ const Notices: React.FC = () => {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-    }).then((response) => console.log(response))
-  }
+    }).then((response) => {
+      console.log(response);
+      alert("Post publicado exitosamente");
+    });
+  };
 
   const consultarNoticias = () => {
     fetch("http://localhost:9000/post", { method: "GET" })
       .then((response) => response.json())
-      .then((data) => console.log(data));
+      .then((data) => {
+        console.log(data);
+        setPosts(data);
+      });
   };
 
   const onFileChange = (e: any) => {
@@ -82,6 +94,29 @@ const Notices: React.FC = () => {
       reader.readAsDataURL(e.target.files[0]);
     } else setFile(null);
   };
+
+  const getUsers = () => {
+    setUsers([])
+
+    firestore
+      .collection('users')
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const data = doc.data()
+          //@ts-ignore
+            setUsers((user) => [
+              ...user,
+              {
+                apellido: data.apellido,
+                nombre: data.nombre,
+                email: data.email,
+                nombreUsuario: data.nombreUsuario
+              },
+            ])
+        })
+      })
+  }
 
   return (
     <Grid container>
@@ -95,6 +130,22 @@ const Notices: React.FC = () => {
         >
           Consultar noticias
         </Button>
+        <br />
+
+        {posts?.length ? (
+          posts?.map((post: Post, i: number) => (
+            <ItemCard
+              // key={i}
+              imagen={post.imagen}
+              titulo={post.titulo}
+              texto={post.texto}
+            />
+          ))
+        ) : (
+          <Typography className={classes.root} variant="h5">
+            No se encontraron resultados
+          </Typography>
+        )}
       </Grid>
 
       <Grid item xs={4} className={classes.grid}>
@@ -140,14 +191,30 @@ const Notices: React.FC = () => {
         <Typography variant="h2">Buscar personas</Typography>
         <form noValidate autoComplete="off">
           <br />
-          <TextField
+          {/* <TextField
             className={classes.root}
             // id="outlined-basic"
             label="Ingrese nombre"
             variant="outlined"
-            onChange={(e) => setTitulo(e.target.value)}
-          />
+            onChange={(e) => {}}
+          /> */}
         </form>
+        <br/>
+        {users?.length ? (
+          users?.map((user: any, i: number) => (
+            <UserCard
+              // key={i}
+              email={user.email}
+              nombre={user.nombre}
+              apellido={user.apellido}
+              nombreUsuario={user.nombreUsuario}
+            />
+          ))
+        ) : (
+          <Typography className={classes.root} variant="h5">
+            No se encontraron resultados
+          </Typography>
+        )} 
       </Grid>
     </Grid>
   );
