@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
+    margin: "5px"
   },
 
   appBar: {
@@ -52,6 +53,12 @@ const useStyles = makeStyles((theme) => ({
     bottom: 0,
     left: 0,
   },
+
+  grid: {
+    textAlign: "center",
+    padding: "1rem"
+  },
+
 }));
 
 export default useStyles;

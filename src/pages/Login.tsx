@@ -13,7 +13,6 @@ import { useHistory } from 'react-router'
 import { auth } from '../config'
 import { ClientRoutes } from '../config/enums'
 import { UsersService } from '../fetch/UsersService'
-import Layout from '../layout/Layout'
 import { User } from '../models/User'
 
 const Login: React.FC<{}> = () => {

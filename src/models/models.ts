@@ -24,3 +24,9 @@ export interface Producto {
     titulo: string;
     precio: number;
 }
+
+export interface Post {
+  texto: string;
+  imagen: string;
+  titulo: string;
+}

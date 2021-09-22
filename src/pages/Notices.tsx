@@ -5,7 +5,7 @@ import { ClientRoutes } from '../config/enums'
 
 const RestaurantMenuPage: React.FC<{}> = () => {
   return (
-    <Route exact path={ClientRoutes.RESTAURANT_MENU}>
+    <Route exact path={ClientRoutes.NOTICES}>
       <Notices />
     </Route>
   )

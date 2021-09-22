@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { ClientRoutes } from "../config/enums";
 import { UsersService } from "../fetch/UsersService";
-import Layout from "../layout/Layout";
+
 
 const Logout: React.FC<{}> = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,6 @@ const Logout: React.FC<{}> = () => {
   });
 
   return (
-    <Layout>
       <Container
         component="main"
         maxWidth="xs"
@@ -59,7 +58,6 @@ const Logout: React.FC<{}> = () => {
         )}
         {error && <Typography>Hubo un error: {error}</Typography>}
       </Container>
-    </Layout>
   );
 };
 export default Logout;
