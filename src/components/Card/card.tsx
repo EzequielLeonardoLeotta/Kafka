@@ -5,6 +5,8 @@ import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import { red } from "@material-ui/core/colors";
 import { Grid } from "@material-ui/core";
+import ThumbUpAltOutlinedIcon from '@material-ui/icons/ThumbUpAltOutlined';
+import ThumbUpAltRoundedIcon from '@material-ui/icons/ThumbUpAltRounded';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,7 +49,8 @@ interface props {
 
 export default function ItemCard({texto, titulo, imagen}: props) {
   const classes = useStyles();
-
+  const [liked, setLiked] = useState(false);
+  
   return (
     <Card variant="outlined">
       <Grid container direction="row" alignItems="center">
@@ -55,11 +58,19 @@ export default function ItemCard({texto, titulo, imagen}: props) {
           <img className={classes.media} src={imagen} alt="No hay foto"/>
         </Grid>
 
-        <Grid container item xs={6} justify="center" >
+        <Grid container item xs={5}>
           <CardContent className={classes.contend}>
             <Typography style={{fontWeight: 'bold'}}>{titulo}</Typography>
             <Typography>{texto}</Typography>
           </CardContent>
+        </Grid>
+
+        <Grid container item xs={1}>
+          <div onClick={() => {
+              setLiked(!liked)
+            }}>
+            {liked ? <ThumbUpAltRoundedIcon/> : <ThumbUpAltOutlinedIcon/>}
+          </div>
         </Grid>
 
       </Grid>
