@@ -22,10 +22,24 @@ const Register: React.FC = () => {
   const [apellido, setApellido] = useState("");
   const [email, setEmail] = useState("");
   const [contraseña, setContraseña] = useState("");
+  const [seguidos, setSeguidos] = useState([]);
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const history = useHistory();
+
+  const createTopics = (nombreUsuario: string) => {
+    fetch("http://localhost:9000/createTopic", {
+      method: "POST",
+      body: JSON.stringify({nombreUsuario: nombreUsuario}),
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      console.log(response);
+    });
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -39,8 +53,10 @@ const Register: React.FC = () => {
         nombreUsuario,
         nombre,
         apellido,
-        email
+        email,
       });
+      
+      createTopics(nombreUsuario)
 
       const currentUser = auth.currentUser;
       localStorage.setItem(
