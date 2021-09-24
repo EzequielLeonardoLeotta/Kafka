@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Card,
   Grid,
@@ -6,6 +7,8 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
+import NotificationsNoneRoundedIcon from "@material-ui/icons/NotificationsNoneRounded";
+import NotificationsRoundedIcon from "@material-ui/icons/NotificationsRounded";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { Post } from "../../models/models";
@@ -26,12 +29,19 @@ const Notices: React.FC = () => {
   const [texto, setTexto] = useState("");
   const [users, setUsers] = useState([]);
   const [seguidos, setSeguidos] = useState([]);
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [isVerNotificaciones, setIsVerNotificaciones] = useState(false);
 
   useEffect(() => {
-    consultarNoticias()
-    getUsers()
-    getSeguidos()
-  },[]);
+    consultarNotificaciones();
+    consultarNoticias();
+    getUsers();
+    getSeguidos();
+    
+    setTimeout(() => {
+      consultarNotificaciones()
+    }, 10000);
+  }, []);
 
   const history = useHistory();
 
@@ -49,7 +59,7 @@ const Notices: React.FC = () => {
             titulo: titulo,
             imagen: url,
             texto: texto,
-            nombreUsuario: localStorage.getItem("FaceUNLa.UserName")
+            nombreUsuario: localStorage.getItem("FaceUNLa.UserName"),
           };
 
           // setPost(postAux);
@@ -86,7 +96,7 @@ const Notices: React.FC = () => {
   };
 
   const consultarNoticias = () => {
-    getSeguidos()
+    getSeguidos();
     fetch("http://localhost:9000/post", { method: "GET" })
       .then((response) => response.json())
       .then((data) => {
@@ -105,44 +115,48 @@ const Notices: React.FC = () => {
   };
 
   const getSeguidos = async () => {
-    setSeguidos([])
-    
+    setSeguidos([]);
+
     await firestore
-    .collection("users")
-    .where("nombreUsuario", "==", localStorage.getItem("FaceUNLa.UserName"))
-    .get()
-    .then((querySnapshot) => {
-      setSeguidos(querySnapshot.docs[0].data().seguidos) 
-    });
-  }
+      .collection("users")
+      .where("nombreUsuario", "==", localStorage.getItem("FaceUNLa.UserName"))
+      .get()
+      .then((querySnapshot) => {
+        setSeguidos(querySnapshot.docs[0].data().seguidos);
+      });
+  };
 
   const getUsers = () => {
-    setUsers([])
+    setUsers([]);
 
     firestore
-      .collection('users')
+      .collection("users")
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          const data = doc.data()
+          const data = doc.data();
           //@ts-ignore
-            setUsers((user) => [
-              ...user,
-              {
-                apellido: data.apellido,
-                nombre: data.nombre,
-                email: data.email,
-                nombreUsuario: data.nombreUsuario,
-              },
-            ])
-        })
-      })
-  }
+          setUsers((user) => [
+            ...user,
+            {
+              apellido: data.apellido,
+              nombre: data.nombre,
+              email: data.email,
+              nombreUsuario: data.nombreUsuario,
+            },
+          ]);
+        });
+      });
+  };
 
   const renderUserCard = (user: any, i: number) => {
-    let lista: Array<Object>=[]; 
+    let lista: Array<Object> = [];
     //@ts-ignore
-    if(user.nombreUsuario!==localStorage.getItem("FaceUNLa.UserName")&&!seguidos.includes(user.nombreUsuario)){
+    if (
+      user.nombreUsuario !== localStorage.getItem("FaceUNLa.UserName") &&
+      //@ts-ignore
+      !seguidos.includes(user.nombreUsuario)
+    ) {
       lista.push(
         <UserCard
           key={i}
@@ -151,26 +165,24 @@ const Notices: React.FC = () => {
           apellido={user.apellido}
           nombreUsuario={user.nombreUsuario}
         />
-      )
+      );
     }
-    return lista
-  }
+    return lista;
+  };
 
   const renderPostCard = (i: number, seguidos: Array<string>, post: Post) => {
-    let lista: Array<Object>=[]; 
+    let lista: Array<Object> = [];
     //@ts-ignore
-    if(seguidos.includes(post.nombreUsuario)){
+    if (seguidos.includes(post.nombreUsuario)) {
       lista.push(
         <ItemCard
           // key={i}
-          texto={post.texto}
-          titulo={post.titulo}
-          imagen={post.imagen}
+          post= {post}
         />
-      )
+      );
     }
-    return lista
-  }
+    return lista;
+  };
 
   const cerrarSesion = () => {
     localStorage.setItem("FaceUNLa.JWT", "");
@@ -179,7 +191,16 @@ const Notices: React.FC = () => {
     localStorage.setItem("FaceUNLa.Apellido", "");
     localStorage.setItem("FaceUNLa.UserId", "");
     history.push(ClientRoutes.LOGIN);
-  }
+  };
+
+  const consultarNotificaciones = () => {
+    fetch("http://localhost:9000/notificacion", { method: "GET" })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setNotificaciones(data);
+      });
+  };
 
   return (
     <Grid container>
@@ -196,9 +217,9 @@ const Notices: React.FC = () => {
         <br />
 
         {posts?.length ? (
-          posts?.map((post: Post, i: number) => (
+          posts?.map((post: Post, i: number) =>
             renderPostCard(i, seguidos, post)
-          ))
+          )
         ) : (
           <Typography className={classes.root} variant="h5">
             No se encontraron resultados
@@ -207,16 +228,34 @@ const Notices: React.FC = () => {
       </Grid>
 
       <Grid item xs={4} className={classes.grid}>
-        <Typography>Bienvenido {localStorage.getItem("FaceUNLa.Nombre")}</Typography>
+        <Typography>
+          Bienvenido {localStorage.getItem("FaceUNLa.Nombre")}   
+          <Badge onClick={()=>setIsVerNotificaciones(!isVerNotificaciones)} color="primary">
+            <NotificationsNoneRoundedIcon />
+            {/* <NotificationsRoundedIcon /> */}
+          </Badge>
+        </Typography>
+        <br/>
         <Button
-            variant="contained"
-            onClick={() => cerrarSesion()}
-            color="secondary"
-          >
-            Cerrar sesión
-          </Button>
+          variant="contained"
+          onClick={() => cerrarSesion()}
+          color="secondary"
+        >
+          Cerrar sesión
+        </Button>
         <br/>
         <br/>
+        {/* Aqui notificaciones */}
+        {isVerNotificaciones&& notificaciones?.map((notificacion:any, i: number) => {
+          if(notificacion.receiverUsername===localStorage.getItem("FaceUNLa.UserName")){
+            return (
+              <Typography>
+              A {notificacion.senderUsername} le gustó tu post "{notificacion.titulo}"
+              </Typography>
+            )
+          }
+        })}
+
         <Typography variant="h2">Agregar post</Typography>
         <form noValidate autoComplete="off">
           <br />
@@ -254,17 +293,15 @@ const Notices: React.FC = () => {
           </Button>
           <br />
         </form>
-        <br/>
+        <br />
         <Typography variant="h2">Buscar personas</Typography>
         {users?.length ? (
-          users?.map((user: any, i: number) => (
-            renderUserCard(user, i)  
-          ))
+          users?.map((user: any, i: number) => renderUserCard(user, i))
         ) : (
           <Typography className={classes.root} variant="h5">
             No se encontraron resultados
           </Typography>
-        )} 
+        )}
       </Grid>
     </Grid>
   );

@@ -7,6 +7,7 @@ import { red } from "@material-ui/core/colors";
 import { Grid } from "@material-ui/core";
 import ThumbUpAltOutlinedIcon from '@material-ui/icons/ThumbUpAltOutlined';
 import ThumbUpAltRoundedIcon from '@material-ui/icons/ThumbUpAltRounded';
+import { Post } from "../../models/models";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,33 +42,41 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface props {
-  titulo: string;
-  texto: string;
-  imagen: string;
-}
-
-export default function ItemCard({texto, titulo, imagen}: props) {
+export default function ItemCard(props:{post: Post}) {
   const classes = useStyles();
   const [liked, setLiked] = useState(false);
   
+  const likePost = () => {
+    fetch("http://localhost:9000/notificacion", {
+      method: "POST",
+      body: JSON.stringify({senderUsername: localStorage.getItem("FaceUNLa.UserName"), titulo: props.post.titulo, receiverUsername: props.post.nombreUsuario}),
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      console.log(response);
+    });
+  };
+
   return (
     <Card variant="outlined">
       <Grid container direction="row" alignItems="center">
         <Grid container item xs={4} justifyContent="flex-start">
-          <img className={classes.media} src={imagen} alt="No hay foto"/>
+          <img className={classes.media} src={props.post.imagen} alt="No hay foto"/>
         </Grid>
 
         <Grid container item xs={5}>
           <CardContent className={classes.contend}>
-            <Typography style={{fontWeight: 'bold'}}>{titulo}</Typography>
-            <Typography>{texto}</Typography>
+            <Typography style={{fontWeight: 'bold'}}>{props.post.titulo}</Typography>
+            <Typography>{props.post.texto}</Typography>
           </CardContent>
         </Grid>
 
         <Grid container item xs={1}>
           <div onClick={() => {
               setLiked(!liked)
+              likePost()
             }}>
             {liked ? <ThumbUpAltRoundedIcon/> : <ThumbUpAltOutlinedIcon/>}
           </div>
