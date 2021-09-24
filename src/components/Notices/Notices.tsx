@@ -15,6 +15,8 @@ import ItemCard from "../Card/card";
 import { firestore as db } from "../../config";
 import UserCard from "../Card/userCard";
 import { User } from "../../models/User";
+import { ClientRoutes } from "../../config/enums";
+import { useHistory } from "react-router";
 
 const Notices: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -23,11 +25,15 @@ const Notices: React.FC = () => {
   const [titulo, setTitulo] = useState("");
   const [texto, setTexto] = useState("");
   const [users, setUsers] = useState([]);
+  const [seguidos, setSeguidos] = useState([]);
 
   useEffect(() => {
     consultarNoticias()
     getUsers()
+    getSeguidos()
   },[]);
+
+  const history = useHistory();
 
   const agregarPost = async () => {
     try {
@@ -80,6 +86,7 @@ const Notices: React.FC = () => {
   };
 
   const consultarNoticias = () => {
+    getSeguidos()
     fetch("http://localhost:9000/post", { method: "GET" })
       .then((response) => response.json())
       .then((data) => {
@@ -96,6 +103,18 @@ const Notices: React.FC = () => {
       reader.readAsDataURL(e.target.files[0]);
     } else setFile(null);
   };
+
+  const getSeguidos = async () => {
+    setSeguidos([])
+    
+    await firestore
+    .collection("users")
+    .where("nombreUsuario", "==", localStorage.getItem("FaceUNLa.UserName"))
+    .get()
+    .then((querySnapshot) => {
+      setSeguidos(querySnapshot.docs[0].data().seguidos) 
+    });
+  }
 
   const getUsers = () => {
     setUsers([])
@@ -136,6 +155,31 @@ const Notices: React.FC = () => {
     return lista
   }
 
+  const renderPostCard = (i: number, seguidos: Array<string>, post: Post) => {
+    let lista: Array<Object>=[]; 
+    //@ts-ignore
+    if(seguidos.includes(post.nombreUsuario)){
+      lista.push(
+        <ItemCard
+          // key={i}
+          texto={post.texto}
+          titulo={post.titulo}
+          imagen={post.imagen}
+        />
+      )
+    }
+    return lista
+  }
+
+  const cerrarSesion = () => {
+    localStorage.setItem("FaceUNLa.JWT", "");
+    localStorage.setItem("FaceUNLa.UserName", "");
+    localStorage.setItem("FaceUNLa.Nombre", "");
+    localStorage.setItem("FaceUNLa.Apellido", "");
+    localStorage.setItem("FaceUNLa.UserId", "");
+    history.push(ClientRoutes.LOGIN);
+  }
+
   return (
     <Grid container>
       <Grid item xs={8} className={classes.grid}>
@@ -152,12 +196,7 @@ const Notices: React.FC = () => {
 
         {posts?.length ? (
           posts?.map((post: Post, i: number) => (
-            <ItemCard
-              // key={i}
-              imagen={post.imagen}
-              titulo={post.titulo}
-              texto={post.texto}
-            />
+            renderPostCard(i, seguidos, post)
           ))
         ) : (
           <Typography className={classes.root} variant="h5">
@@ -167,7 +206,16 @@ const Notices: React.FC = () => {
       </Grid>
 
       <Grid item xs={4} className={classes.grid}>
-        {/* Agregar post, buscar personas */}
+        <Typography>Bienvenido {localStorage.getItem("FaceUNLa.Nombre")}</Typography>
+        <Button
+            variant="contained"
+            onClick={() => cerrarSesion()}
+            color="secondary"
+          >
+            Cerrar sesión
+          </Button>
+        <br/>
+        <br/>
         <Typography variant="h2">Agregar post</Typography>
         <form noValidate autoComplete="off">
           <br />
@@ -204,20 +252,9 @@ const Notices: React.FC = () => {
             Subir post
           </Button>
           <br />
-          <br />
-        </form>
-        <Typography variant="h2">Buscar personas</Typography>
-        <form noValidate autoComplete="off">
-          <br />
-          {/* <TextField
-            className={classes.root}
-            // id="outlined-basic"
-            label="Ingrese nombre"
-            variant="outlined"
-            onChange={(e) => {}}
-          /> */}
         </form>
         <br/>
+        <Typography variant="h2">Buscar personas</Typography>
         {users?.length ? (
           users?.map((user: any, i: number) => (
             renderUserCard(user, i)  

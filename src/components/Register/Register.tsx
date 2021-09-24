@@ -59,7 +59,7 @@ const Register: React.FC = () => {
         seguidos,
       });
       
-      createTopics(nombreUsuario)
+      // createTopics(nombreUsuario)
 
       const currentUser = auth.currentUser;
       localStorage.setItem(
