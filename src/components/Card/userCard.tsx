@@ -70,7 +70,7 @@ export default function UserCard({
     .update({
       seguidos: usuariosSeguidos 
     })
-  
+    
   };
 
   return (

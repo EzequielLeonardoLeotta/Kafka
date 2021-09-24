@@ -141,7 +141,8 @@ const Notices: React.FC = () => {
 
   const renderUserCard = (user: any, i: number) => {
     let lista: Array<Object>=[]; 
-    if(user.nombreUsuario!==localStorage.getItem("FaceUNLa.UserName")){
+    //@ts-ignore
+    if(user.nombreUsuario!==localStorage.getItem("FaceUNLa.UserName")&&!seguidos.includes(user.nombreUsuario)){
       lista.push(
         <UserCard
           key={i}
