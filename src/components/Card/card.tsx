@@ -54,7 +54,7 @@ export default function ItemCard({texto, titulo, imagen}: props) {
   return (
     <Card variant="outlined">
       <Grid container direction="row" alignItems="center">
-        <Grid container item xs={4} justify="flex-start">
+        <Grid container item xs={4} justifyContent="flex-start">
           <img className={classes.media} src={imagen} alt="No hay foto"/>
         </Grid>
 

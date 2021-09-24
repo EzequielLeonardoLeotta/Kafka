@@ -49,11 +49,14 @@ const Register: React.FC = () => {
 
       await auth.createUserWithEmailAndPassword(email, contraseña);
 
+      const seguidos: Array<string> = []
+
       await UsersService.postUserToCollection({
         nombreUsuario,
         nombre,
         apellido,
         email,
+        seguidos,
       });
       
       createTopics(nombreUsuario)

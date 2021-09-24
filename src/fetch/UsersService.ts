@@ -19,7 +19,7 @@ export class UsersService {
   }
 
   static async postUserToCollection(user: User) {
-    await users.doc().set(user);
+    await users.doc(user.nombreUsuario).set(user);
   }
 
   static async signOutUser() {

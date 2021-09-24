@@ -14,6 +14,7 @@ import { storage, firestore } from "../../config";
 import ItemCard from "../Card/card";
 import { firestore as db } from "../../config";
 import UserCard from "../Card/userCard";
+import { User } from "../../models/User";
 
 const Notices: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -42,6 +43,7 @@ const Notices: React.FC = () => {
             titulo: titulo,
             imagen: url,
             texto: texto,
+            nombreUsuario: localStorage.getItem("FaceUNLa.UserName")
           };
 
           // setPost(postAux);
@@ -111,11 +113,27 @@ const Notices: React.FC = () => {
                 apellido: data.apellido,
                 nombre: data.nombre,
                 email: data.email,
-                nombreUsuario: data.nombreUsuario
+                nombreUsuario: data.nombreUsuario,
               },
             ])
         })
       })
+  }
+
+  const renderUserCard = (user: any, i: number) => {
+    let lista: Array<Object>=[]; 
+    if(user.nombreUsuario!==localStorage.getItem("FaceUNLa.UserName")){
+      lista.push(
+        <UserCard
+          key={i}
+          email={user.email}
+          nombre={user.nombre}
+          apellido={user.apellido}
+          nombreUsuario={user.nombreUsuario}
+        />
+      )
+    }
+    return lista
   }
 
   return (
@@ -202,13 +220,7 @@ const Notices: React.FC = () => {
         <br/>
         {users?.length ? (
           users?.map((user: any, i: number) => (
-            <UserCard
-              // key={i}
-              email={user.email}
-              nombre={user.nombre}
-              apellido={user.apellido}
-              nombreUsuario={user.nombreUsuario}
-            />
+            renderUserCard(user, i)  
           ))
         ) : (
           <Typography className={classes.root} variant="h5">
