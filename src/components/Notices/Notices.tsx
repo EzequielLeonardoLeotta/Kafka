@@ -40,7 +40,7 @@ const Notices: React.FC = () => {
     
     setTimeout(() => {
       consultarNotificaciones()
-    }, 10000);
+    }, 3000);
   }, []);
 
   const history = useHistory();
